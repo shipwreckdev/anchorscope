@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: anchorscope
+  namespace: default
+spec:
+  serviceAccountName: anchorscope
+  containers:
+  - name: anchorscope
+    image: shipwreckdev/anchorscope:latest
+    args: ["--namespaces", "default", "kube-system"]
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: anchorscope
+  labels:
+    app.kubernetes.io/name: anchorscope
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: anchorscope
+  labels:
+    app.kubernetes.io/name: anchorscope
+rules:
+- apiGroups: ['']
+  resources: [pods]
+  verbs: [get, watch, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: anchorscope
+  labels:
+    app.kubernetes.io/name: anchorscope
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: anchorscope
+subjects:
+- kind: ServiceAccount
+  name: anchorscope
+  namespace: default
